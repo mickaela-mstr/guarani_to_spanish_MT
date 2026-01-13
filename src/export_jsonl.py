@@ -1,5 +1,3 @@
-# script pour exporter les splits en jsonl pour entraînement MT
-
 import pandas as pd
 
 df = pd.read_csv("../data/jojajovai_all_clean.csv")

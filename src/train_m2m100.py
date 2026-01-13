@@ -83,8 +83,6 @@ def main():
     def compute_metrics(eval_pred):
         preds, labels = eval_pred
         preds_text = tokenizer.batch_decode(preds, skip_special_tokens=True)
-
-        # labels: -100 -> pad
         labels = [[(t if t != -100 else tokenizer.pad_token_id) for t in seq] for seq in labels]
         refs_text = tokenizer.batch_decode(labels, skip_special_tokens=True)
 
@@ -121,7 +119,6 @@ def main():
 
     out_path = Path("data/m2m100_ft_predictions.txt")
     out_path.write_text("\n".join(hyps), encoding="utf-8")
-    print("Saved predictions:", out_path)
 
 
 if __name__ == "__main__":

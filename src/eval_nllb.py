@@ -51,8 +51,6 @@ def main():
     for i in range(0, len(srcs), BATCH_SIZE):
         batch = srcs[i:i+BATCH_SIZE]
         hyps.extend(translate_batch(model, tokenizer, batch, device))
-        #if (i // BATCH_SIZE) % 50 == 0:
-         #   print(f"Progress: {i}/{len(srcs)}")
         if i % (BATCH_SIZE * 100) == 0:
             print(f"Progress: {i}/{len(srcs)}")
 
@@ -62,8 +60,6 @@ def main():
 
     out_path = Path("data/nllb_oob_predictions.txt")
     out_path.write_text("\n".join(hyps), encoding="utf-8")
-    print("Saved predictions:", out_path)
-
 
 if __name__ == "__main__":
     main()

@@ -26,7 +26,6 @@ def score(name: str, hyps, refs):
     chrf = sacrebleu.corpus_chrf(hyps, [refs]).score
     ter  = sacrebleu.corpus_ter(hyps, [refs]).score
 
-    print(f"\n== {name} ==")
     print(f"BLEU : {bleu:.4f}")
     print(f"chrF : {chrf:.4f}")
     print(f"TER  : {ter:.4f}")
