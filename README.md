@@ -1,82 +1,111 @@
-# Projet : Traduction automatique Guarani → Espagnol
+# Mini-projet : Traduction automatique du guarani vers l’espagnol
 
-## 1. Données utilisées
+Ce projet est réalisé dans un cadre universitaire en Master 2 traitement automatique des langues.
+Il porte sur la traduction automatique du guarani vers l’espagnol et la comparaison de deux modèles multilingues de traduction neuronale sur un même corpus parallèle.
 
-### 1.1 Corpus principal : Jojajovai (Guarani ↔ Espagnol)
+L’objectif principal est d’étudier la capacité d’un modèle multilingue généraliste à apprendre une langue absente de son pré-entraînement via un fine-tuning supervisé, et de comparer ses performances à celles d’un modèle spécialisé censé déjà prendre en charge cette langue.
 
-Nous utilisons le corpus parallèle **Jojajovai**, composé d’environ **30 000 paires de phrases alignées** guarani–espagnol :
+---
 
+## Objectifs du projet
+
+- Préparer et nettoyer un corpus parallèle guarani–espagnol
+- Fine-tuner un modèle de traduction multilingue
+- Évaluer un modèle spécialisé en mode *out-of-the-box*
+- Comparer les performances des deux approches
+- Analyser les résultats à l’aide de métriques automatiques de traduction
+
+---
+
+## Données
+
+Le corpus utilisé est **Jojajovai**, un corpus parallèle guarani–espagnol aligné par phrase, contenant environ 30 000 paires de phrases.
 🔗 [https://github.com/pln-fing-udelar/jojajovai/tree/main/data](https://github.com/pln-fing-udelar/jojajovai/tree/main/data)
 
 > Luis Chiruzzo, Santiago Góngora, Aldo Alvarez, Gustavo Giménez-Lugo, Marvin Agüero-Torales, Yliana Rodríguez. (2022). *Jojajovai: A Parallel Guarani-Spanish Corpus for MT Benchmarking.* Proceedings of the 13th Language Resources and Evaluation Conference, LREC 2022.
 
-### 1.2 Composition du corpus
+Le corpus est déjà divisé en trois partitions :
 
-Les textes du corpus Jojajovai proviennent majoritairement de :
+* train
+* test
+* dev
 
-* journaux et articles contemporains,
-* mythes et légendes,
-* contenus culturels ou éducatifs.
 
-### 1.3 Nettoyage des données
-
-Une étape de *data cleaning* est nécessaire pour :
-
-* retirer les dialectes ou variétés qui ne relèvent pas du guarani,
-* homogénéiser la langue source,
-* éliminer les exemples bruités ou non alignés.
+Un sous-ensemble du jeu de test est annoté manuellement par des locuteurs natifs du guarani. Ces annotations indiquent le dialecte présent dans la phrase ainsi que la qualité de l’alignement entre la phrase source et la traduction.
 
 ---
 
-## 2. Modèles de traduction explorés
+## Modèles utilisés
 
-Notre objectif est de comparer deux modèles de traduction multilingue adaptés aux langues peu dotées : **M2M100** et **NLLB-200**.
+### M2M100
 
-### 2.1 M2M100 (Meta) — Fine-tuning prévu
+M2M100 est un modèle multilingue de traduction basé sur une architecture Transformer encodeur–décodeur. Il permet la traduction directe entre plus de cent langues sans passer par une langue pivot comme l’anglais.
 
-M2M100 est un modèle couvrant plus de 100 langues et capable de traduire directement entre n’importe quelle paire de langues, sans pivot par l’anglais.
+Le guarani n’étant pas pris en charge nativement par ce modèle, une stratégie d’alias de langue est utilisée. Une étiquette de langue existante est employée comme substitut pour représenter le guarani lors du fine-tuning. Le modèle est ensuite affiné de manière supervisée sur le corpus Jojajovai.
 
-Nous prévoyons de fine-tuner M2M100 sur nos données guarani–espagnol afin de spécialiser le modèle pour notre tâche.
+### NLLB-200
 
-### 2.2 NLLB-200 (Meta) — Test direct sans fine-tuning
+NLLB-200 est un modèle multilingue spécialisé dans la traduction de langues peu dotées. Il annonce un support natif pour le guarani et l’espagnol, intégrés dans son vocabulaire et ses données de pré-entraînement.
 
-NLLB-200 est conçu pour les langues peu dotées, dont le guarani (grn_Latn).
-Le vocabulaire et la représentation du guarani sont déjà inclus dans son pré-entraînement.
-
-Plan d’expérimentation :
-
-* Tester NLLB-200 directement, sans fine-tuning, sur nos données.
-* Comparer ses performances avec le M2M100 fine-tuné.
+Dans ce projet, NLLB-200 est utilisé sans affinement supplémentaire afin d’évaluer ses performances *out-of-the-box* sur la traduction guarani–espagnol.
 
 ---
 
-## 3. Evaluation prévue
+## Évaluation
 
-Nous utiliserons la métrique semi-automatique de traduction automatique BLEU et les scores seront calculés sur un jeu de test séparé issu du corpus nettoyé.
+Les traductions produites par les modèles sont évaluées sur le jeu de test à l’aide de métriques automatiques :
+
+- **BLEU** : mesure de similarité basée sur les n-grammes de mots
+- **chrF** : mesure de similarité au niveau des caractères
+- **TER** : taux d’édition nécessaire pour transformer une traduction en référence
+
+Ces métriques permettent d’analyser à la fois la proximité lexicale, la robustesse morphologique et le coût de post-édition des traductions.
 
 ---
 
-## 4. Premiers tests effectués
+## Résultats principaux
 
-### 4.1 Vérification du modèle NLLB-200
+Les expériences montrent que le modèle **M2M100 fine-tuné** obtient de meilleures performances que **NLLB-200 utilisé sans adaptation**, notamment en termes de BLEU et de TER.
 
-Pour s'assurer du bon fonctionnement du modèle sur nos machines (CPU uniquement), nous avons d’abord reproduit l’exemple HuggingFace :
+Le score chrF reste similaire entre les deux modèles, ce qui indique que les deux systèmes produisent déjà des formes espagnoles correctes sur le plan orthographique. Les gains observés concernent principalement l’alignement traductionnel et le choix lexical.
 
-* Traduction **anglais → français** (codes `eng_Latn` → `fra_Latn`)
-* Résultat conforme aux attentes.
+Ces résultats suggèrent qu’une adaptation supervisée ciblée peut compenser, au moins en partie, l’absence de support natif d’une langue dans un modèle multilingue.
 
-### 4.2 Premier test Guarani → Français
+---
 
-Nous avons ensuite choisi une phrase au hasard dans le corpus Jojajovai et testé la traduction **guarani → français** (code `grn_Latn`).
+## Arborescence du projet
 
-**Phrase source (guarani) :**
-« *Omopotîvo hikuái tetãme vicio política, ko'ã itaugüeño he'íva ombotovévo pokarême umi elemento omopotîva.* »
+```text
+guarani_to_spanish_MT/
+├── data/
+│   ├── csv/
+│   │   ├── jojajovai_all.csv
+│   │   ├── jojajovai_all_clean.csv
+│   │   └── jojajovai_sample_annotations.csv
+│   └── jsonl/
+│       ├── jojajovai_train.jsonl
+│       ├── jojajovai_dev.jsonl
+│       └── jojajovai_test.jsonl
+│
+├── resultats/
+│   ├── m2m100_ft_predictions.txt
+│   └── nllb_oob_predictions.txt
+│
+├── src/
+│   ├── nettoyage/
+│   │   ├── clean_all.py
+│   │   ├── clean_annot.py
+│   │   └── export_jsonl.py
+│   │
+│   ├── finetuning/
+│   │   └── train_m2m100.py
+│   │
+│   ├── eval/
+│   │   └── eval_nllb.py
+│   │
+│   └── metrics/
+│       └── metrics.py
+│
+├── README.md
 
-**Sortie NLLB-200 :**
-« *Lorsqu'ils ont nettoyé le pays des vices politiques, ces sculpteurs ont déclaré qu'ils rejetaient la pureté des éléments qui le nettoyaient.* »
-
-### 4.3 Observations
-
-* La traduction est grammaticalement correcte, mais le sens semble décalé.
-* Cela suggère soit une ambiguïté sémantique, soit une interprétation incorrecte due à la complexité morphologique du guarani.
-* Des locuteurs natifs vérifieront cette première impression.
+```
