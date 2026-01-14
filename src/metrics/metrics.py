@@ -7,6 +7,7 @@ TEST_PATH = ROOT /"jojajovai_test.jsonl"
 
 NLLB_PRED = ROOT / "nllb_oob_predictions.txt"
 M2M_PRED  = ROOT / "m2m100_ft_predictions.txt"
+NLLB_FT_PRED = ROOT / "nllb_ft_predictions.txt"
 
 def load_refs(test_path: Path):
     refs = []
@@ -34,6 +35,7 @@ def main():
     refs = load_refs(TEST_PATH)
     score("NLLB (OOB)", load_hyps(NLLB_PRED), refs)
     score("M2M100 (fine-tuned)", load_hyps(M2M_PRED), refs)
+    score("NLLB (fine-tuned)", load_hyps(NLLB_FT_PRED), refs)
 
 if __name__ == "__main__":
     main()

@@ -1,6 +1,5 @@
 import json
 import torch
-import sacrebleu
 from pathlib import Path
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
@@ -53,10 +52,6 @@ def main():
         hyps.extend(translate_batch(model, tokenizer, batch, device))
         if i % (BATCH_SIZE * 100) == 0:
             print(f"Progress: {i}/{len(srcs)}")
-
-
-    bleu = sacrebleu.corpus_bleu(hyps, [refs])
-    print("NLLB OOB BLEU:", bleu.score)
 
     out_path = Path("data/nllb_oob_predictions.txt")
     out_path.write_text("\n".join(hyps), encoding="utf-8")
